@@ -12,7 +12,6 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 
@@ -55,8 +54,8 @@ public class FacebookLoginHelper {
                                         cellNo = null;
                                     }
 
-                                    FacebookModel facebookModel = new FacebookModel(loginResult.getAccessToken().getToken(), loginResult.getAccessToken().getUserId(), name, firsName, lastName, gender, email, profilePicture, cellNo);
-                                    mListener.onFbSignInSuccess(facebookModel);
+                                    FacebookLoginModel facebookLoginModel = new FacebookLoginModel(loginResult.getAccessToken().getToken(), loginResult.getAccessToken().getUserId(), name, firsName, lastName, gender, email, profilePicture, cellNo);
+                                    mListener.onFbSignInSuccess(facebookLoginModel);
                                 } catch (Exception ex) {
 
                                 }

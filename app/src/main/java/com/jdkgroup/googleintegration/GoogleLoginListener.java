@@ -1,7 +1,7 @@
 package com.jdkgroup.googleintegration;
 
 public interface GoogleLoginListener {
-  void onGoogleAuthSignIn(String authToken, String userId);
+  void onGoogleAuthSignIn(GoogleLoginModel googleLoginModel);
   void onGoogleAuthSignInFailed(String errorMessage);
   void onGoogleAuthSignOut();
 }

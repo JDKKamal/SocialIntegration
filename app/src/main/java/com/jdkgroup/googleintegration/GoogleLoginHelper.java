@@ -2,6 +2,7 @@ package com.jdkgroup.googleintegration;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,6 +21,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
 import java.io.IOException;
+import java.net.URI;
 
 public class GoogleLoginHelper implements GoogleApiClient.OnConnectionFailedListener {
     private final String SCOPES = "oauth2:profile email";
@@ -28,14 +30,16 @@ public class GoogleLoginHelper implements GoogleApiClient.OnConnectionFailedList
     private GoogleLoginListener mListener;
     private GoogleApiClient mGoogleApiClient;
 
-    public GoogleLoginHelper(@NonNull GoogleLoginListener listener, FragmentActivity context, @Nullable String serverClientId) {
+    public GoogleLoginHelper(@NonNull GoogleLoginListener listener, FragmentActivity context,
+                             @Nullable String serverClientId) {
         mContext = context;
         mListener = listener;
         buildGoogleApiClient(buildSignInOptions(serverClientId));
     }
 
     private GoogleSignInOptions buildSignInOptions(@Nullable String serverClientId) {
-        GoogleSignInOptions.Builder gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail();
+        GoogleSignInOptions.Builder gso =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail();
         if (serverClientId != null) gso.requestIdToken(serverClientId);
         return gso.build();
     }
@@ -58,6 +62,7 @@ public class GoogleLoginHelper implements GoogleApiClient.OnConnectionFailedList
         if (requestCode == RC_SIGN_IN) {
             final GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
+                final GoogleSignInAccount googleSignInAccount = result.getSignInAccount();
                 AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
                     @Override
                     protected String doInBackground(Void... params) {
@@ -72,13 +77,22 @@ public class GoogleLoginHelper implements GoogleApiClient.OnConnectionFailedList
 
                     @Override
                     protected void onPostExecute(String token) {
-                        GoogleSignInAccount acct = result.getSignInAccount();
-                        mListener.onGoogleAuthSignIn(token, acct.getId());
+                        String id, name, email;
+                        Uri personPhoto;
+
+                        id = googleSignInAccount.getId();
+                        name = googleSignInAccount.getDisplayName();
+                        email = googleSignInAccount.getEmail();
+                        personPhoto = googleSignInAccount.getPhotoUrl();
+
+                        GoogleLoginModel googleLoginModel = new GoogleLoginModel(token, id, name, email, personPhoto);
+
+                        mListener.onGoogleAuthSignIn(googleLoginModel);
                     }
                 };
                 task.execute();
             } else {
-                mListener.onGoogleAuthSignInFailed(result.getStatus().getStatusMessage());
+                mListener.onGoogleAuthSignInFailed(result.getStatus().toString());
             }
         }
     }
